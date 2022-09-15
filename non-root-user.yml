@@ -1,0 +1,16 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: creating 'healthcheck' user
+      user: name=healthcheck append=yes state=present createhome=yes shell=/bin/bash
+
+    - name: creating 'healthcheck' for passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        line: 'healthcheck ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+    - name: authorized keys for the healthcheck user
+      authorized_key: user=healthcheck key="{{item}}"
+      with_file:
+        - ~/.ssh/id_rsa.pub
